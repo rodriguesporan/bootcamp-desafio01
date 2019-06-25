@@ -7,7 +7,8 @@ let counterReq = 0;
 const app = express();
 const checkProjectExist = (req, res, next) => {
   const { id } = req.params;
-  if (!projects[id]) {
+  const project = projects.find(p => p.id == id);
+  if (!project) {
     return res.status(400).json({ erro: "Project does not exist" });
   }
   return next();
@@ -28,23 +29,27 @@ app
   })
   .post("/projects", (req, res) => {
     const { id, title } = req.body;
-    projects[id] = { id, title, tasks: [] };
+    projects.push({ id, title, tasks: [] });
     return res.json(projects);
   })
   .put("/projects/:id", checkProjectExist, (req, res) => {
     const { title } = req.body;
     const { id } = req.params;
-    projects[id].title = title;
+    const project = projects.find(p => p.id == id);
+    project.title = title;
+    return res.json(projects);
   })
   .delete("/projects/:id", checkProjectExist, (req, res) => {
     const { id } = req.params;
-    projects.splice(id, 1);
+    const index = projects.findIndex(p => p.id == id);
+    projects.splice(index, 1);
+    return res.json(projects);
   })
   .post("/projects/:id/tasks", checkProjectExist, (req, res) => {
     const { title } = req.body;
     const { id } = req.params;
-    const { tasks } = projects[id];
-    projects[id].tasks = [...tasks, title];
+    const project = projects.find(p => p.id == id);
+    project.tasks.push(title);
     return res.json(projects);
   });
 
